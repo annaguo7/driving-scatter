@@ -19,7 +19,13 @@ const yScale = d3.scaleLinear()
     .range([height - margin.bottom, margin.top])
 
 //create path line
-const line = d3.line();
+const line = d3.line()
+    .curve(d3.curveCatmullRom);
+
+//get path length
+function length(path) {
+    return d3.create("svg:path").attr("d", path).node().getTotalLength();
+  }
 
 //create white space for labels
 function halo(text) {
@@ -87,16 +93,21 @@ function update(data){
         .y(d => yScale(d.gas));
 
     //create path
+    const l = length(line(data));
+
     svg.append("path")
         .datum(data)
         .attr("fill", "none")
         .attr("stroke", "steelblue")
         .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-dasharray", `0,${l}`)
         .attr("stroke-width", 2.5)
         .attr("d", line)
         .transition()
-        .duration(6000)
+        .duration(5000)
         .ease(d3.easeLinear)
+        .attr("stroke-dasharray", `${l},${l}`)
         ;
     //Add data points to scatter plot
     svg.selectAll('circle')
